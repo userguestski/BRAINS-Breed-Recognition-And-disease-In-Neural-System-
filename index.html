@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BRAINS — Veterinary Diagnostic System</title>
+  <meta name="description" content="AI-powered breed and disease detection for pets and livestock"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ══════════════ NAVIGATION ══════════════ -->
+  <header class="navbar">
+    <nav class="nav-inner">
+
+      <a href="#" class="logo">
+        <div class="logo-icon">🧠</div>
+        <span class="logo-text">BRAINS</span>
+        <span class="logo-version">v2.0</span>
+      </a>
+
+      <div class="nav-center">
+        <span class="nav-item" onclick="showSection('diagnose')">Diagnose</span>
+        <span class="nav-item" onclick="showSection('history')">History</span>
+        <span class="nav-item" onclick="showSection('about')">About</span>
+      </div>
+
+      <div class="nav-right">
+        <!-- Dark / Light mode toggle -->
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+          <span class="theme-icon-dark">🌙</span>
+          <span class="theme-icon-light">☀️</span>
+        </button>
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          <span id="apiStatus">Configure API</span>
+        </div>
+      </div>
+
+    </nav>
+  </header>
+
+  <!-- ══════════════ API SETUP BANNER ══════════════ -->
+  <div class="setup-banner" id="setupBanner">
+    <div class="setup-inner">
+      <span class="setup-label">⚙️ BACKEND URL</span>
+      <input type="text" id="backendUrl" class="setup-input"
+        placeholder="http://localhost:5000  (your Flask server address)">
+      <button class="setup-btn" onclick="saveConfig()">Connect</button>
+      <span class="setup-hint" id="configHint">Enter your Flask server URL to connect</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ MAIN SECTIONS ══════════════ -->
+  <main>
+
+    <!-- ── DIAGNOSE SECTION ── -->
+    <section id="section-diagnose" class="section active">
+
+      <!-- Hero -->
+      <div class="hero">
+        <p class="eyebrow">Intelligent Veterinary Diagnostics</p>
+        <h1>Breed &amp; Disease<br><em>Detection System</em></h1>
+        <p class="hero-sub">Upload a photo, describe symptoms — get a complete clinical diagnosis with care plan.</p>
+        <div class="species-chips">
+          <span class="chip active">🐕 Dogs</span>
+          <span class="chip active">🐈 Cats</span>
+          <span class="chip active">🐄 Cattle</span>
+          <span class="chip active">🐐 Goats</span>
+          <span class="chip">🐴 Horses</span>
+          <span class="chip">🐑 Sheep</span>
+          <span class="chip">🐰 Rabbits</span>
+        </div>
+      </div>
+
+      <!-- Form Grid -->
+      <div class="form-grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="form-col">
+
+          <!-- Photo Upload Card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-icon">📸</span>
+              <div>
+                <div class="card-title">Animal Photos</div>
+                <div class="card-sub">Upload up to 3 angles for best accuracy</div>
+              </div>
+            </div>
+
+            <!-- Photo slots -->
+            <div class="photo-slots">
+              <div class="photo-slot" id="slot0" onclick="triggerUpload(0)">
+                <input type="file" id="fileInput0" accept="image/*" onchange="handleFile(event,0)" hidden>
+                <div class="slot-empty">
+                  <span class="slot-icon">+</span>
+                  <span class="slot-label">Main Photo</span>
+                  <span class="slot-hint">Front / Side view</span>
+                </div>
+                <div class="slot-preview" id="preview0" style="display:none">
+                  <img id="previewImg0" alt="Photo 1">
+                  <button class="slot-remove" onclick="removePhoto(event,0)">×</button>
+                  <span class="slot-badge">MAIN</span>
+                </div>
+              </div>
+
+              <div class="photo-slot" id="slot1" onclick="triggerUpload(1)">
+                <input type="file" id="fileInput1" accept="image/*" onchange="handleFile(event,1)" hidden>
+                <div class="slot-empty">
+                  <span class="slot-icon">+</span>
+                  <span class="slot-label">Side Angle</span>
+                  <span class="slot-hint">Optional</span>
+                </div>
+                <div class="slot-preview" id="preview1" style="display:none">
+                  <img id="previewImg1" alt="Photo 2">
+                  <button class="slot-remove" onclick="removePhoto(event,1)">×</button>
+                  <span class="slot-badge">SIDE</span>
+                </div>
+              </div>
+
+              <div class="photo-slot" id="slot2" onclick="triggerUpload(2)">
+                <input type="file" id="fileInput2" accept="image/*" onchange="handleFile(event,2)" hidden>
+                <div class="slot-empty">
+                  <span class="slot-icon">+</span>
+                  <span class="slot-label">Close-up</span>
+                  <span class="slot-hint">Lesion / Area of concern</span>
+                </div>
+                <div class="slot-preview" id="preview2" style="display:none">
+                  <img id="previewImg2" alt="Photo 3">
+                  <button class="slot-remove" onclick="removePhoto(event,2)">×</button>
+                  <span class="slot-badge">DETAIL</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Image quality bar (shown after upload) -->
+            <div class="quality-indicator" id="qualityIndicator" style="display:none">
+              <span class="quality-label">Image Quality</span>
+              <div class="quality-track">
+                <div class="quality-fill" id="qualityFill"></div>
+              </div>
+              <span class="quality-score" id="qualityScore">—</span>
+            </div>
+          </div>
+
+          <!-- Symptoms Card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-icon">📝</span>
+              <div>
+                <div class="card-title">Symptoms & Signs</div>
+                <div class="card-sub">Describe everything you have noticed</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="symptoms">Clinical Signs *</label>
+              <textarea class="form-textarea" id="symptoms" rows="4"
+                placeholder="e.g. Intense scratching for 2 weeks, circular hair loss on back, red inflamed patches, reduced appetite, seems lethargic..."></textarea>
+              <span class="char-count" id="charCount">0 characters</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="symptomDuration">How Long?</label>
+                <select class="form-select" id="symptomDuration">
+                  <option value="">Unknown</option>
+                  <option value="Less than 24 hours">Less than 24 hours</option>
+                  <option value="2-3 days">2–3 days</option>
+                  <option value="About 1 week">About 1 week</option>
+                  <option value="2 weeks">2 weeks</option>
+                  <option value="3-4 weeks">3–4 weeks</option>
+                  <option value="1-3 months">1–3 months</option>
+                  <option value="More than 3 months">More than 3 months</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="severity">Severity</label>
+                <select class="form-select" id="severity">
+                  <option value="">Unknown</option>
+                  <option value="Mild — barely noticeable">Mild</option>
+                  <option value="Moderate — clearly affecting daily life">Moderate</option>
+                  <option value="Severe — significantly distressed">Severe</option>
+                  <option value="Critical — emergency level">Critical</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="form-col">
+
+          <!-- Animal Details Card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-icon">🐾</span>
+              <div>
+                <div class="card-title">Animal Details</div>
+                <div class="card-sub">More detail = more accurate diagnosis</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="species">Species</label>
+                <select class="form-select" id="species">
+                  <option value="">Unknown</option>
+                  <option>Dog</option><option>Cat</option><option>Cattle</option>
+                  <option>Goat</option><option>Horse</option><option>Sheep</option>
+                  <option>Rabbit</option><option>Pig</option><option>Bird</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="sex">Sex</label>
+                <select class="form-select" id="sex">
+                  <option>Unknown</option><option>Male</option><option>Female</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="knownAge">Age</label>
+                <input class="form-input" type="text" id="knownAge" placeholder="e.g. 3 years">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="weightKg">Weight (kg)</label>
+                <input class="form-input" type="number" id="weightKg" placeholder="e.g. 18.5" step="0.1" min="0">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="reproStatus">Reproductive Status</label>
+                <select class="form-select" id="reproStatus">
+                  <option value="">Unknown</option>
+                  <option value="Neutered / Spayed">Neutered / Spayed</option>
+                  <option value="Intact">Intact</option>
+                  <option value="Pregnant">Pregnant</option>
+                  <option value="Lactating">Lactating</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="region">Region / Location</label>
+                <input class="form-input" type="text" id="region" placeholder="e.g. Hyderabad, India">
+              </div>
+            </div>
+          </div>
+
+          <!-- Lifestyle & History Card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-icon">🏠</span>
+              <div>
+                <div class="card-title">Lifestyle & History</div>
+                <div class="card-sub">Helps identify environmental and dietary causes</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="vaccinationStatus">Vaccination</label>
+                <select class="form-select" id="vaccinationStatus">
+                  <option value="">Unknown</option>
+                  <option value="Up to date">Up to date</option>
+                  <option value="Overdue">Overdue</option>
+                  <option value="Never vaccinated">Never vaccinated</option>
+                  <option value="Partially vaccinated">Partially vaccinated</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="dietType">Diet</label>
+                <select class="form-select" id="dietType">
+                  <option value="">Unknown</option>
+                  <option value="Commercial dry food">Commercial dry food</option>
+                  <option value="Commercial wet food">Commercial wet food</option>
+                  <option value="Homemade food">Homemade food</option>
+                  <option value="Raw diet">Raw diet</option>
+                  <option value="Mixed">Mixed</option>
+                  <option value="Grazing / pasture">Grazing / Pasture</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="environment">Living Environment</label>
+                <select class="form-select" id="environment">
+                  <option value="">Unknown</option>
+                  <option value="Indoor only">Indoor only</option>
+                  <option value="Outdoor only">Outdoor only</option>
+                  <option value="Indoor and outdoor">Indoor and outdoor</option>
+                  <option value="Farm / rural">Farm / Rural</option>
+                  <option value="Stray / shelter">Stray / Shelter</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="animalContact">Contact with Other Animals</label>
+                <select class="form-select" id="animalContact">
+                  <option value="">Unknown</option>
+                  <option value="Yes — recently">Yes — recently</option>
+                  <option value="Yes — regularly">Yes — regularly</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="recentMeds">Medications in Last 30 Days</label>
+              <input class="form-input" type="text" id="recentMeds" placeholder="e.g. Ivermectin 2 weeks ago, none otherwise">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="recentChanges">Any Recent Changes?</label>
+              <input class="form-input" type="text" id="recentChanges" placeholder="e.g. New food, moved house, new pet added">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="medicalHistory">Past Medical History</label>
+              <textarea class="form-textarea" id="medicalHistory" rows="2"
+                placeholder="e.g. Had mange 6 months ago, surgery last year, otherwise healthy..."></textarea>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="btn-diagnose" id="diagnoseBtn" onclick="runDiagnosis()">
+            <div class="btn-spinner"></div>
+            <span class="btn-text">🔬 Run Diagnosis</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ── LOADING PANEL ── -->
+      <div class="loading-panel" id="loadingPanel">
+        <div class="loading-orb"></div>
+        <p class="loading-title">Analysing your case…</p>
+        <div class="loading-stages" id="loadingStages">
+          <div class="stage" id="s1"><div class="stage-dot"></div>Preprocessing image</div>
+          <div class="stage" id="s2"><div class="stage-dot"></div>Sending to diagnostic engine</div>
+          <div class="stage" id="s3"><div class="stage-dot"></div>Visual analysis in progress</div>
+          <div class="stage" id="s4"><div class="stage-dot"></div>Building differential diagnosis</div>
+          <div class="stage" id="s5"><div class="stage-dot"></div>Medication safety check</div>
+          <div class="stage" id="s6"><div class="stage-dot"></div>Compiling report</div>
+        </div>
+      </div>
+
+      <!-- ── RESULTS PANEL ── -->
+      <div class="results-panel" id="resultsPanel">
+
+        <!-- Record bar -->
+        <div class="record-bar">
+          <div class="record-left">
+            <span class="record-id" id="recordId">—</span>
+            <span class="record-ts" id="recordTs">—</span>
+          </div>
+          <div class="record-right">
+            <div class="record-quality">
+              <span>Quality</span>
+              <div class="qbar-wrap"><div class="qbar-fill" id="qBarFill"></div></div>
+              <span id="qBarScore">—</span>
+            </div>
+            <button class="icon-btn" onclick="printReport()" title="Print report">🖨️</button>
+            <button class="icon-btn" onclick="copyReport()" title="Copy to clipboard" id="copyBtn">📋</button>
+            <button class="icon-btn" onclick="exportPDF()" title="Save as PDF">💾</button>
+          </div>
+        </div>
+
+        <!-- Results grid (filled by script.js) -->
+        <div class="results-grid" id="resultsGrid"></div>
+
+        <!-- Safe/unsafe banner -->
+        <div class="safe-banner" id="safeBanner"></div>
+
+      </div>
+
+    </section>
+
+    <!-- ── HISTORY SECTION ── -->
+    <section id="section-history" class="section">
+      <div class="history-header">
+        <h2>Diagnosis History</h2>
+        <p class="history-sub">All past diagnoses saved to your account</p>
+        <div class="history-controls">
+          <input class="search-input" type="text" id="historySearch"
+            placeholder="🔍  Search by breed, condition, date..."
+            oninput="filterHistory()">
+          <button class="danger-btn" onclick="clearAllHistory()">Clear All</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty" id="historyEmpty">
+          <p>🗂️</p>
+          <p>No diagnoses yet</p>
+          <p>Run a diagnosis and it will appear here</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ABOUT SECTION ── -->
+    <section id="section-about" class="section">
+      <div class="about-wrap">
+        <h2>About BRAINS</h2>
+        <p class="about-desc">
+          <strong>B.R.A.I.N.S</strong> — Breed Recognition &amp; Automated Intelligent Nosological System.
+          A diagnostic support tool for veterinarians and animal health technicians.
+        </p>
+
+        <div class="about-cards">
+          <div class="about-card">
+            <div class="about-card-icon">📸</div>
+            <div class="about-card-title">Multi-Photo Analysis</div>
+            <div class="about-card-desc">Upload up to 3 angles — main, side, and close-up. More photos = higher accuracy.</div>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">🩺</div>
+            <div class="about-card-title">Differential Diagnosis</div>
+            <div class="about-card-desc">Ranked list of possible conditions with supporting and ruling-out signs.</div>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">⚠️</div>
+            <div class="about-card-title">Medication Safety</div>
+            <div class="about-card-desc">Automatic PEDIATRIC / GERIATRIC / CONTRAINDICATED classification for all medications.</div>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">📈</div>
+            <div class="about-card-title">Future Risk Prediction</div>
+            <div class="about-card-desc">Breed-specific genetic risks and condition progression warnings.</div>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">☁️</div>
+            <div class="about-card-title">Cloud History</div>
+            <div class="about-card-desc">Every diagnosis saved to Firebase — accessible from any device.</div>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">🌓</div>
+            <div class="about-card-title">Dark &amp; Light Mode</div>
+            <div class="about-card-desc">Switch between themes instantly. Preference saved automatically.</div>
+          </div>
+        </div>
+
+        <div class="disclaimer-box">
+          <strong>⚠️ Clinical Disclaimer</strong><br>
+          BRAINS is an AI-assisted pre-screening tool only. All outputs must be reviewed and confirmed by a
+          licensed veterinarian before any treatment is initiated. Not a substitute for professional veterinary care.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════ TOAST NOTIFICATION ══════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══════════════ HISTORY DETAIL MODAL ══════════════ -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCRIPTS ══════════════ -->
+  <!-- Firebase SDK (loaded first) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    window.__firebaseReady = false;
+    window.__initFirebase = function(config) {
+      try {
+        const app = initializeApp(config);
+        window.__db = getFirestore(app);
+        window.__firebaseReady = true;
+        console.log("Firebase connected");
+      } catch(e) {
+        console.warn("Firebase init failed:", e.message);
+      }
+    };
+  </script>
+
+  <script src="database.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
