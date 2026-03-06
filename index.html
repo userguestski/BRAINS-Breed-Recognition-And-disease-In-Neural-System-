@@ -466,24 +466,20 @@
   </div>
 
   <!-- ══════════════ SCRIPTS ══════════════ -->
-  <!-- Firebase SDK (loaded first) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    window.__firebaseReady = false;
-    window.__initFirebase = function(config) {
-      try {
-        const app = initializeApp(config);
-        window.__db = getFirestore(app);
-        window.__firebaseReady = true;
-        console.log("Firebase connected");
-      } catch(e) {
-        console.warn("Firebase init failed:", e.message);
-      }
+
+  <!-- Firebase config -->
+  <script>
+    var FIREBASE_CONFIG = {
+      apiKey:            "AIzaSyBdkXgG5tBvpnK7zUOTfANUq8IWoQynmeQ",
+      authDomain:        "nomoresweat.firebaseapp.com",
+      projectId:         "nomoresweat",
+      storageBucket:     "nomoresweat.firebasestorage.app",
+      messagingSenderId: "538412047873",
+      appId:             "1:538412047873:web:ac7c9b03f6879cf5826a00"
     };
   </script>
 
-  <script src="database.js"></script>
+  <script src="database.js?v=3"></script>
   <script src="script.js"></script>
 
 </body>

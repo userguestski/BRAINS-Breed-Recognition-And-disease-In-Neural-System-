@@ -576,37 +576,40 @@ function exportPDF() {
 
 async function loadHistory() {
   const container = document.getElementById("historyList");
-  const empty     = document.getElementById("historyEmpty");
-
-  container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.82rem">Loading history…</div>`;
+  container.innerHTML = `
+    <div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.82rem">
+      Loading history…
+    </div>`;
 
   try {
     const records = await db_loadHistory();
     STATE.allHistory = records;
     renderHistory(records);
   } catch (err) {
-    container.innerHTML = `<div style="color:var(--accent-red);font-size:.8rem;padding:1rem">Failed to load history: ${err.message}</div>`;
+    container.innerHTML = `
+      <div style="color:var(--accent-red);font-size:.8rem;padding:1rem">
+        Failed to load history: ${err.message}
+      </div>`;
   }
 }
 
 function renderHistory(records) {
   const container = document.getElementById("historyList");
-  const empty     = document.getElementById("historyEmpty");
 
   if (!records || records.length === 0) {
-    container.innerHTML = "";
-    container.appendChild(empty);
-    empty.style.display = "block";
+    container.innerHTML = `
+      <div class="history-empty">
+        <p>🗂️</p>
+        <p>No diagnoses yet</p>
+        <p>Run a diagnosis and it will appear here</p>
+      </div>`;
     return;
   }
 
-  empty.style.display = "none";
   container.innerHTML = records.map(r => `
     <div class="hist-card" onclick="openHistoryDetail('${r.id}')">
       <div class="hist-thumb">
-        ${r.imageThumb
-          ? `<img src="${r.imageThumb}" alt="thumb">`
-          : "🐾"}
+        ${r.imageThumb ? `<img src="${r.imageThumb}" alt="thumb">` : "🐾"}
       </div>
       <div class="hist-body">
         <div class="hist-breed">${esc(r.breed || "Unknown")}</div>
