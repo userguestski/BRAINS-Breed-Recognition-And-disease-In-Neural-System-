@@ -35,7 +35,7 @@ async function db_saveReport(report, imageDataUrl) {
     ageBand:      report.estimated_age_band || "—",
     prognosis:    report.prognosis          || "—",
     emergency:    (report.emergency_flags   || []).length > 0,
-    safeToProced: report.safe_to_proceed    !== false,
+    safeToProceed: report.safe_to_proceed    !== false,
     imageThumb:   imageDataUrl              || null,
     timestamp:    report.timestamp          || new Date().toISOString(),
     fullReport:   report,
