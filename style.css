@@ -674,3 +674,95 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 5rem; }
   .results-panel { display: block !important; }
   .results-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   AUTH SCREEN
+════════════════════════════════════════════════════════════════ */
+#authScreen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.auth-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2.5rem 2rem;
+  width: 100%; max-width: 400px;
+  box-shadow: var(--shadow);
+  animation: fadeUp .4s ease;
+}
+.auth-logo   { text-align: center; margin-bottom: 1.5rem; }
+.auth-brand  { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: .1em; }
+.auth-tagline{ font-family: var(--font-mono); font-size: .62rem; color: var(--text-dim); margin-top: .2rem; letter-spacing: .12em; }
+.auth-title  { font-family: var(--font-display); font-size: 1.1rem; font-weight: 300; text-align: center; margin-bottom: 1.2rem; color: var(--text-muted); }
+.auth-error  { background: rgba(224,96,96,.08); border: 1px solid rgba(224,96,96,.25); border-radius: 8px; color: #e07070; font-size: .76rem; padding: .6rem .9rem; margin-bottom: .8rem; text-align: center; }
+.auth-fields { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+.auth-input  {
+  width: 100%; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-family: var(--font-body); font-size: .85rem;
+  padding: .75rem 1rem; outline: none;
+  transition: border-color var(--transition);
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-input::placeholder { color: var(--text-dim); }
+.auth-btn {
+  width: 100%; padding: .78rem; border-radius: 10px;
+  font-family: var(--font-body); font-size: .88rem; font-weight: 500;
+  cursor: pointer; border: none; transition: all .2s ease;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.auth-btn.primary {
+  background: linear-gradient(135deg, #328a3e, #50b05c);
+  color: #fff; box-shadow: 0 4px 16px rgba(80,176,92,.2);
+}
+.auth-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(80,176,92,.3); }
+.auth-btn.primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.auth-btn.google {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  color: var(--text); margin-top: 0;
+}
+.auth-btn.google:hover { border-color: var(--border-light); background: var(--bg-elevated); }
+.auth-divider {
+  text-align: center; position: relative; margin: 1rem 0;
+  color: var(--text-dim); font-size: .72rem;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: 42%; height: 1px; background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after  { right: 0; }
+.auth-toggle {
+  text-align: center; margin-top: 1.2rem;
+  font-size: .76rem; color: var(--accent);
+  cursor: pointer; text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── USER INFO IN NAVBAR ─────────────────────────────────────── */
+.user-info {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px 4px 4px;
+}
+.user-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #328a3e, #50b05c);
+  color: #fff; font-size: .72rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-label {
+  font-family: var(--font-mono); font-size: .65rem;
+  color: var(--text-muted); max-width: 120px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.logout-btn {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text-dim);
+  font-family: var(--font-mono); font-size: .6rem;
+  padding: 2px 7px; cursor: pointer;
+  transition: all var(--transition);
+}
+.logout-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }

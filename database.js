@@ -1,12 +1,12 @@
 // BRAINS — database.js
-// No API keys here — config is loaded from index.html
+// Firebase Firestore — history saved per user account
 
 var _db    = null;
 var _fns   = null;
 var _ready = false;
+window._firebaseApp = null;
 
 async function db_init() {
-  // FIREBASE_CONFIG is defined in index.html <script> block
   if (typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_FIREBASE_API_KEY") {
     console.warn("BRAINS: Firebase not configured. Using localStorage.");
     return;
@@ -14,8 +14,9 @@ async function db_init() {
   try {
     var fbApp   = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     var fbStore = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    var app = fbApp.initializeApp(FIREBASE_CONFIG);
-    _db   = fbStore.getFirestore(app);
+
+    window._firebaseApp = fbApp.initializeApp(FIREBASE_CONFIG);
+    _db   = fbStore.getFirestore(window._firebaseApp);
     _fns  = fbStore;
     _ready = true;
     console.log("Firebase connected ✅");
@@ -25,6 +26,12 @@ async function db_init() {
 }
 
 db_init();
+
+// Get collection path — per user so histories don't mix
+function _col() {
+  var uid = (typeof auth_userId === "function") ? auth_userId() : "anonymous";
+  return _fns.collection(_db, "users", uid, "diagnoses");
+}
 
 async function db_saveReport(report, imageDataUrl) {
   var record = {
@@ -43,7 +50,7 @@ async function db_saveReport(report, imageDataUrl) {
 
   if (_ready && _db) {
     try {
-      await _fns.setDoc(_fns.doc(_fns.collection(_db, "diagnoses"), record.id), record);
+      await _fns.setDoc(_fns.doc(_col(), record.id), record);
       console.log("Saved to Firebase:", record.id);
       return { success: true, source: "firebase" };
     } catch (err) {
@@ -57,7 +64,7 @@ async function db_saveReport(report, imageDataUrl) {
 async function db_loadHistory() {
   if (_ready && _db) {
     try {
-      var q        = _fns.query(_fns.collection(_db, "diagnoses"), _fns.orderBy("timestamp", "desc"));
+      var q        = _fns.query(_col(), _fns.orderBy("timestamp", "desc"));
       var snapshot = await _fns.getDocs(q);
       var records  = [];
       snapshot.forEach(function(d) { records.push(d.data()); });
@@ -72,7 +79,7 @@ async function db_loadHistory() {
 async function db_deleteRecord(id) {
   if (_ready && _db) {
     try {
-      await _fns.deleteDoc(_fns.doc(_fns.collection(_db, "diagnoses"), id));
+      await _fns.deleteDoc(_fns.doc(_col(), id));
       return { success: true };
     } catch (err) {
       console.warn("Firebase delete failed:", err.message);
@@ -85,9 +92,9 @@ async function db_deleteRecord(id) {
 async function db_clearAll() {
   if (_ready && _db) {
     try {
-      var snapshot = await _fns.getDocs(_fns.collection(_db, "diagnoses"));
+      var snapshot = await _fns.getDocs(_col());
       var dels = [];
-      snapshot.forEach(function(d) { dels.push(_fns.deleteDoc(_fns.doc(_db, "diagnoses", d.id))); });
+      snapshot.forEach(function(d) { dels.push(_fns.deleteDoc(_fns.doc(_db, d.ref.path))); });
       await Promise.all(dels);
       return { success: true };
     } catch (err) {
